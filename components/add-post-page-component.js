@@ -1,15 +1,29 @@
+import { renderHeaderComponent } from "./header-component.js";
+import { renderUploadImageComponent } from "./upload-image-component.js";
+
 export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
   const render = () => {
     // @TODO: Реализовать страницу добавления поста
     const appHtml = `
     <div class="page-container">
       <div class="header-container"></div>
+      <div id="upload-image-container"></div>
       Cтраница добавления поста
       <button class="button" id="add-button">Добавить</button>
     </div>
   `;
 
     appEl.innerHTML = appHtml;
+
+    const uploadImageContainer = document.getElementById(
+      "upload-image-container"
+    );
+    renderUploadImageComponent({
+      element: uploadImageContainer,
+      onImageUrlChange: (newImageUrl) => {
+        imageUrl = newImageUrl;
+      },
+    });
 
     document.getElementById("add-button").addEventListener("click", () => {
       onAddPostClick({
@@ -20,4 +34,8 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
   };
 
   render();
+
+  renderHeaderComponent({
+    element: document.querySelector(".header-container"),
+  });
 }
