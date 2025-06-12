@@ -2,7 +2,7 @@ import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage } from "../index.js";
 
-export function renderPostsPageComponent({ appEl }) {
+export function userRenderPostsPageComponent({ appEl, userId }) {
   // @TODO: реализовать рендер постов из api
   console.log("Актуальный список постов:", posts);
 
@@ -11,7 +11,9 @@ export function renderPostsPageComponent({ appEl }) {
    * можно использовать https://date-fns.org/v2.29.3/docs/formatDistanceToNow
    */
 
-  const postsHtml = posts
+  const userPosts = posts.filter((post) => post.user.id === userId);
+
+  const userPostsHtml = userPosts
     .map((post) => {
       const likeImage = post.isLiked
         ? "./assets/images/like-active.svg"
@@ -54,7 +56,7 @@ export function renderPostsPageComponent({ appEl }) {
     <div class="page-container">
       <div class="header-container"></div>
       <ul class="posts">
-        ${postsHtml}
+        ${userPostsHtml}
       </ul>
     </div>
   `;
