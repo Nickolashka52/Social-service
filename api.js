@@ -1,3 +1,4 @@
+import { updatePostInUI } from "./components/UI-update-after-like-change-component.js";
 import { getToken } from "./index.js";
 
 // Замени на свой, чтобы получить независимый от других набор данных.
@@ -82,10 +83,12 @@ export function uploadImage({ file }) {
   const data = new FormData();
   data.append("file", file);
 
+  //console.log(baseHost + "/api/upload/image");
   return fetch(baseHost + "/api/upload/image", {
     method: "POST",
     body: data,
   }).then((response) => {
+    //console.log("Ответ от uploadImage:", response);
     return response.json();
   });
 }
@@ -105,4 +108,30 @@ export function addPost({ description, imageUrl }) {
     }
     return response.json();
   });
+}
+
+export function toggleLike({ postId, isLiked, token }) {
+  const url = isLiked
+    ? `${postsHost}/${postId}/dislike`
+    : `${postsHost}/${postId}/like`;
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Ошибка при обновлении лайка");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // Обновляем пост в DOM по полученным данным
+      updatePostInUI(data.post);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }

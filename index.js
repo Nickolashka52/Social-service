@@ -147,10 +147,8 @@ const renderApp = () => {
 
   if (page === USER_POSTS_PAGE) {
     // @TODO: реализовать страницу с фотографиями отдельного пользвателя
-    const userId = appEl.getAttribute("data-user-id");
     return userRenderPostsPageComponent({
       appEl,
-      userId,
     });
   }
 };
