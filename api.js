@@ -1,5 +1,5 @@
 import { updatePostInUI } from "./components/UI-update-after-like-change-component.js";
-import { getToken } from "./index.js";
+import { getToken, posts } from "./index.js";
 
 // Замени на свой, чтобы получить независимый от других набор данных.
 
@@ -115,23 +115,28 @@ export function toggleLike({ postId, isLiked, token }) {
     ? `${postsHost}/${postId}/dislike`
     : `${postsHost}/${postId}/like`;
 
-  fetch(url, {
+  return fetch(url, {
     method: "POST",
     headers: {
       Authorization: token,
     },
   })
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
         throw new Error("Ошибка при обновлении лайка");
       }
       return response.json();
     })
-    .then((data) => {
-      // Обновляем пост в DOM по полученным данным
+    .then(data => {
+      // Обновляем локальный массив posts
+      const postIndex = posts.findIndex((p) => p.id === postId);
+      if (postIndex !== -1) {
+        posts[postIndex] = data.post;
+      }
+
+      // Обновляем UI конкретного поста
       updatePostInUI(data.post);
-    })
-    .catch((error) => {
-      console.error(error);
+
+      return data.post;
     });
 }

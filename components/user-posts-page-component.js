@@ -84,12 +84,40 @@ export function userRenderPostsPageComponent({ appEl }) {
   document.querySelectorAll(".like-button").forEach((btn) => {
     btn.addEventListener("click", () => {
       const postId = btn.dataset.postId;
-
       const imgEl = btn.querySelector("img");
       const isLiked = imgEl.src.includes("like-active.svg");
       const token = getToken();
 
-      toggleLike({ postId, isLiked, token });
+      toggleLike({ postId, isLiked, token })
+        .then((updatedPost) => {
+          // Обновить локальный массив posts
+          const postIndex = posts.findIndex((p) => p.id === postId);
+          if (postIndex !== -1) {
+            posts[postIndex] = updatedPost;
+          }
+
+          // Обновить UI кнопки лайка и текста
+          const newLikeImage = updatedPost.isLiked
+            ? "./assets/images/like-active.svg"
+            : "./assets/images/like-not-active.svg";
+          imgEl.src = newLikeImage;
+
+          // Обновить текст лайков
+          const postLikesTextEl = btn.nextElementSibling; // <p class="post-likes-text">
+          if (postLikesTextEl) {
+            const likes = updatedPost.likes;
+            const lastLikerName =
+              likes.length > 0 ? likes[likes.length - 1].name : "";
+            const likeTextEl =
+              likes.length > 1
+                ? `${lastLikerName} и еще ${likes.length - 1}`
+                : `${lastLikerName}`;
+            postLikesTextEl.innerHTML = `Нравится: <strong>${likeTextEl}</strong>`;
+          }
+        })
+        .catch((error) => {
+          alert(error.message || "Ошибка при обновлении лайка");
+        });
     });
   });
 }
