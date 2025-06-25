@@ -1,4 +1,5 @@
 import { renderHeaderComponent } from "./header-component.js";
+import { sanitizeInput } from "./sanitize-input.js";
 import { renderUploadImageComponent } from "./upload-image-component.js";
 
 export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
@@ -36,7 +37,7 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
     });
 
     document.getElementById("add-button").addEventListener("click", () => {
-      const description = appEl.querySelector(".textarea").value;
+      const description = sanitizeInput(appEl.querySelector(".textarea").value);
 
       if (imageUrl) {
         onAddPostClick({
