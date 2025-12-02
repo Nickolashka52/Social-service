@@ -1,7 +1,12 @@
+import { updatePostInUI } from "./components/UI-update-after-like-change-component.js";
+import { getToken, posts } from "./index.js";
+
 // Замени на свой, чтобы получить независимый от других набор данных.
+
 // "боевая" версия инстапро лежит в ключе prod
 const personalKey = "prod";
-const baseHost = "https://webdev-hw-api.vercel.app";
+const baseHost = "https://wedev-api.sky.pro";
+//const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 
 export function getPosts({ token }) {
@@ -16,6 +21,24 @@ export function getPosts({ token }) {
         throw new Error("Нет авторизации");
       }
 
+      return response.json();
+    })
+    .then((data) => {
+      return data.posts;
+    });
+}
+
+export function getUserPosts({ token, userId }) {
+  return fetch(`${postsHost}/user-posts/${userId}`, {
+    method: "GET",
+    headers: {
+      Authorization: token,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Ошибка при загрузке страницы пользователя");
+      }
       return response.json();
     })
     .then((data) => {
@@ -60,10 +83,60 @@ export function uploadImage({ file }) {
   const data = new FormData();
   data.append("file", file);
 
+  //console.log(baseHost + "/api/upload/image");
   return fetch(baseHost + "/api/upload/image", {
     method: "POST",
     body: data,
   }).then((response) => {
+    //console.log("Ответ от uploadImage:", response);
     return response.json();
   });
+}
+
+export function addPost({ description, imageUrl }) {
+  const token = getToken();
+
+  return fetch(postsHost, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+    body: JSON.stringify({ description, imageUrl }),
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error("Ошибка при добавлении поста");
+    }
+    return response.json();
+  });
+}
+
+export function toggleLike({ postId, isLiked, token }) {
+  const url = isLiked
+    ? `${postsHost}/${postId}/dislike`
+    : `${postsHost}/${postId}/like`;
+
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Ошибка при обновлении лайка");
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Обновляем локальный массив posts
+      const postIndex = posts.findIndex((p) => p.id === postId);
+      if (postIndex !== -1) {
+        posts[postIndex] = data.post;
+      }
+
+      // Обновляем UI конкретного поста
+      updatePostInUI(data.post);
+
+      return data.post;
+    });
 }
